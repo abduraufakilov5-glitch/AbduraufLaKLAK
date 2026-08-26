@@ -8,5 +8,5 @@ export default async function DashboardLayout({ children }: Readonly<{ children:
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  return <div className="flex min-h-screen"><Sidebar/><main className="min-w-0 flex-1"><MobileNav/><RealtimeRefresh/><div className="mx-auto max-w-7xl p-5 pb-10 sm:p-8">{children}</div></main></div>;
+  return <div className="flex min-h-screen"><Sidebar/><main className="min-w-0 flex-1"><MobileNav/><RealtimeRefresh/><div className="mx-auto max-w-7xl px-4 pb-28 pt-5 sm:p-8 sm:pb-10">{children}</div></main></div>;
 }
