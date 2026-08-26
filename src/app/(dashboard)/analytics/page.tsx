@@ -1,0 +1,2 @@
+import { SectionPage } from "@/components/section-page";
+export default function AnalyticsPage(){return <SectionPage title="Analytics" eyebrow="Performance" description="Revenue, cost, profit, orders, units sold, average order value and product profitability."/>;}

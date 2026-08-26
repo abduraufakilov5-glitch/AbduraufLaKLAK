@@ -1,0 +1,2 @@
+import { SectionPage } from "@/components/section-page";
+export default function ProductsPage(){return <SectionPage title="Products" eyebrow="Catalog" description="Manage products, SKU variants, images and marketplace content."/>;}

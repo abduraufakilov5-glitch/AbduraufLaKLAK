@@ -1,0 +1,2 @@
+import { SectionPage } from "@/components/section-page";
+export default function InventoryPage(){return <SectionPage title="Inventory" eyebrow="Stock control" description="Track SKU-level stock, movement history, low-stock thresholds and replenishment."/>;}

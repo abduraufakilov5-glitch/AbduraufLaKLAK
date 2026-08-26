@@ -1,0 +1,3 @@
+export function SectionPage({ title, eyebrow, description }: { title: string; eyebrow: string; description: string }) {
+  return <section><header className="mb-8"><p className="mb-2 text-sm text-[var(--gold)]">{eyebrow}</p><h1 className="text-3xl font-semibold tracking-tight">{title}</h1><p className="mt-2 max-w-2xl text-sm text-[var(--muted)]">{description}</p></header><div className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-6"><p className="text-sm text-[var(--muted)]">This area is wired to the Supabase schema and will remain server-rendered by default. Data mutations belong in server actions/route handlers so authorization cannot be bypassed by the UI.</p></div></section>;
+}

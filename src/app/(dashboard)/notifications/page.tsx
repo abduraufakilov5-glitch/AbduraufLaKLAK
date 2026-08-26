@@ -1,0 +1,2 @@
+import { SectionPage } from "@/components/section-page";
+export default function NotificationsPage(){return <SectionPage title="Notifications" eyebrow="Inbox" description="Low-stock, new-order, order-status, AI-generation and system notifications."/>;}

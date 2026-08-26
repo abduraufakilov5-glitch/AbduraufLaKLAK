@@ -1,0 +1,2 @@
+import { SectionPage } from "@/components/section-page";
+export default function OrdersPage(){return <SectionPage title="Orders" eyebrow="Operations" description="Manage order lifecycle from pending through delivery, cancellation and returns."/>;}

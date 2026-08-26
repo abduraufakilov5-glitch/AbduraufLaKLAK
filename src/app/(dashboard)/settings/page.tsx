@@ -1,0 +1,2 @@
+import { SectionPage } from "@/components/section-page";
+export default function SettingsPage(){return <SectionPage title="Settings" eyebrow="Workspace" description="Roles, profile, integrations and operational configuration."/>;}
