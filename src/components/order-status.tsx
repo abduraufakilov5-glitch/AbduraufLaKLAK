@@ -1,0 +1,5 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+const statuses=["pending","confirmed","processing","shipped","delivered","cancelled","returned"] as const;
+export function OrderStatus({ id, initial }: { id:string; initial:string }){const router=useRouter();const [value,setValue]=useState(initial);const [busy,setBusy]=useState(false);async function change(v:string){const previous=value;setValue(v);setBusy(true);try{const r=await fetch(`/api/orders/${id}`,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({status:v})});if(!r.ok){const d=await r.json();throw new Error(d.error??"Update failed")}router.refresh()}catch{setValue(previous)}finally{setBusy(false)}}return <select aria-label="Order status" disabled={busy} value={value} onChange={e=>void change(e.target.value)} className="rounded-full border border-[var(--line)] bg-transparent px-3 py-1.5 text-xs outline-none">{statuses.map(s=><option key={s} value={s}>{s}</option>)}</select>}
