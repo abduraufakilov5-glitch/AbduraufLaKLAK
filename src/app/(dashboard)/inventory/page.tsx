@@ -1,2 +1,13 @@
-import { SectionPage } from "@/components/section-page";
-export default function InventoryPage(){return <SectionPage title="Inventory" eyebrow="Stock control" description="Track SKU-level stock, movement history, low-stock thresholds and replenishment."/>;}
+import { createClient } from "@/lib/supabase/server";
+
+interface VariantRow { id: string; sku: string; color: string | null; material: string | null; size: string | null; selling_price: number; quantity: number; minimum_quantity: number; }
+
+export default async function InventoryPage() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("product_variants").select("id,sku,color,material,size,selling_price,quantity,minimum_quantity,products(name)").order("quantity", { ascending: true }).limit(100);
+  const variants = (data ?? []) as unknown as Array<VariantRow & { products: { name: string } | null }>;
+  const low = variants.filter(v=>v.quantity>0 && v.quantity<=v.minimum_quantity).length;
+  const out = variants.filter(v=>v.quantity===0).length;
+  const units = variants.reduce((s,v)=>s+v.quantity,0);
+  return <section><header className="mb-7"><p className="mb-2 text-sm text-[var(--gold)]">Stock control</p><h1 className="text-3xl font-semibold tracking-tight">Inventory</h1><div className="mt-4 flex flex-wrap gap-2 text-xs"><span className="rounded-full border border-[var(--line)] px-3 py-1.5">{units} units</span><span className="rounded-full border border-[var(--line)] px-3 py-1.5">{low} low stock</span><span className="rounded-full border border-[var(--line)] px-3 py-1.5">{out} out of stock</span></div></header>{error?<p className="text-sm text-red-700">Could not load inventory.</p>:<div className="overflow-x-auto rounded-2xl border border-[var(--line)] bg-[var(--card)]"><table className="w-full min-w-[760px] text-left text-sm"><thead className="border-b border-[var(--line)] text-xs text-[var(--muted)]"><tr><th className="p-4 font-medium">SKU</th><th className="p-4 font-medium">Product</th><th className="p-4 font-medium">Variant</th><th className="p-4 text-right font-medium">Price</th><th className="p-4 text-right font-medium">Qty</th><th className="p-4 text-right font-medium">Min</th></tr></thead><tbody className="divide-y divide-[var(--line)]">{variants.length===0?<tr><td colSpan={6} className="p-8 text-center text-[var(--muted)]">No SKUs yet.</td></tr>:variants.map(v=><tr key={v.id}><td className="p-4 font-medium">{v.sku}</td><td className="p-4">{v.products?.name??"—"}</td><td className="p-4 text-[var(--muted)]">{[v.color,v.material,v.size].filter(Boolean).join(" · ")||"—"}</td><td className="p-4 text-right">{Number(v.selling_price).toFixed(2)}</td><td className={`p-4 text-right font-medium ${v.quantity===0?"text-red-700":v.quantity<=v.minimum_quantity?"text-amber-700":""}`}>{v.quantity}</td><td className="p-4 text-right text-[var(--muted)]">{v.minimum_quantity}</td></tr>)}</tbody></table></div>}</section>;
+}

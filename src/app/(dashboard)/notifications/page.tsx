@@ -1,2 +1,8 @@
-import { SectionPage } from "@/components/section-page";
-export default function NotificationsPage(){return <SectionPage title="Notifications" eyebrow="Inbox" description="Low-stock, new-order, order-status, AI-generation and system notifications."/>;}
+import { createClient } from "@/lib/supabase/server";
+
+interface NotificationRow { id:string; type:string; title:string; message:string; read_at:string|null; created_at:string; }
+
+export default async function NotificationsPage(){
+ const supabase=await createClient(); const {data,error}=await supabase.from("notifications").select("id,type,title,message,read_at,created_at").order("created_at",{ascending:false}).limit(50); const items=(data??[]) as unknown as NotificationRow[];
+ return <section><header className="mb-7"><p className="mb-2 text-sm text-[var(--gold)]">Inbox</p><h1 className="text-3xl font-semibold tracking-tight">Notifications</h1><p className="mt-2 text-sm text-[var(--muted)]">Realtime-ready operational alerts.</p></header>{error?<p className="text-sm text-red-700">Could not load notifications.</p>:<div className="space-y-3">{items.length===0?<div className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-8 text-sm text-[var(--muted)]">No notifications.</div>:items.map(n=><article key={n.id} className={`rounded-2xl border border-[var(--line)] bg-[var(--card)] p-5 ${n.read_at?"opacity-60":""}`}><div className="flex items-center justify-between gap-4"><div className="text-sm font-medium">{n.title}</div><span className="text-[10px] uppercase tracking-wider text-[var(--muted)]">{n.type}</span></div><p className="mt-2 text-sm text-[var(--muted)]">{n.message}</p><time className="mt-3 block text-xs text-[var(--muted)]">{new Date(n.created_at).toLocaleString("ru-RU")}</time></article>)}</div>}</section>;
+}

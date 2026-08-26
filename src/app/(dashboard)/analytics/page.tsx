@@ -1,2 +1,14 @@
-import { SectionPage } from "@/components/section-page";
-export default function AnalyticsPage(){return <SectionPage title="Analytics" eyebrow="Performance" description="Revenue, cost, profit, orders, units sold, average order value and product profitability."/>;}
+import { createClient } from "@/lib/supabase/server";
+
+interface ProfitRow { product_id: string; name: string; units_sold: number; revenue: number; cost: number; profit: number; }
+
+export default async function AnalyticsPage() {
+  const supabase = await createClient();
+  const [{ data: summary }, { data: products, error }] = await Promise.all([
+    supabase.from("inventory_summary").select("sku_count,total_units,inventory_value,out_of_stock,low_stock").single(),
+    supabase.from("product_profitability").select("product_id,name,units_sold,revenue,cost,profit").order("profit", { ascending: false }).limit(10),
+  ]);
+  const rows=(products??[]) as unknown as ProfitRow[];
+  const revenue=rows.reduce((s,r)=>s+Number(r.revenue),0); const cost=rows.reduce((s,r)=>s+Number(r.cost),0); const profit=rows.reduce((s,r)=>s+Number(r.profit),0);
+  return <section><header className="mb-7"><p className="mb-2 text-sm text-[var(--gold)]">Performance</p><h1 className="text-3xl font-semibold tracking-tight">Analytics</h1><p className="mt-2 text-sm text-[var(--muted)]">Current indexed inventory plus top profitable products.</p></header><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[["Revenue",`${revenue.toFixed(2)} TJS`],["Cost",`${cost.toFixed(2)} TJS`],["Profit",`${profit.toFixed(2)} TJS`],["Inventory value",`${Number(summary?.inventory_value??0).toFixed(2)} TJS`]].map(([label,value])=><div key={label} className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-5"><div className="text-sm text-[var(--muted)]">{label}</div><div className="mt-3 text-2xl font-semibold tracking-tight">{value}</div></div>)}</div>{error?<p className="mt-5 text-sm text-red-700">Could not load profitability data.</p>:<div className="mt-6 overflow-x-auto rounded-2xl border border-[var(--line)] bg-[var(--card)]"><table className="w-full min-w-[680px] text-left text-sm"><thead className="border-b border-[var(--line)] text-xs text-[var(--muted)]"><tr><th className="p-4 font-medium">Product</th><th className="p-4 text-right font-medium">Units</th><th className="p-4 text-right font-medium">Revenue</th><th className="p-4 text-right font-medium">Cost</th><th className="p-4 text-right font-medium">Profit</th></tr></thead><tbody className="divide-y divide-[var(--line)]">{rows.map(r=><tr key={r.product_id}><td className="p-4 font-medium">{r.name}</td><td className="p-4 text-right">{r.units_sold}</td><td className="p-4 text-right">{Number(r.revenue).toFixed(2)}</td><td className="p-4 text-right">{Number(r.cost).toFixed(2)}</td><td className="p-4 text-right font-medium">{Number(r.profit).toFixed(2)}</td></tr>)}</tbody></table></div>}</section>;
+}

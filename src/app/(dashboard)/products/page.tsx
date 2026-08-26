@@ -1,2 +1,12 @@
-import { SectionPage } from "@/components/section-page";
-export default function ProductsPage(){return <SectionPage title="Products" eyebrow="Catalog" description="Manage products, SKU variants, images and marketplace content."/>;}
+import { createClient } from "@/lib/supabase/server";
+
+interface VariantRow { id: string; sku: string; color: string | null; material: string | null; size: string | null; selling_price: number; quantity: number; minimum_quantity: number; }
+interface ProductRow { id: string; name: string; slug: string; active: boolean; categories: { name: string } | null; product_variants: VariantRow[]; }
+
+export default async function ProductsPage() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("products").select("id,name,slug,active,categories(name),product_variants(id,sku,color,material,size,selling_price,quantity,minimum_quantity)").order("created_at", { ascending: false }).limit(50);
+  const products = (data ?? []) as unknown as ProductRow[];
+  if (error) return <section><h1 className="text-3xl font-semibold tracking-tight">Products</h1><p className="mt-3 text-sm text-red-700">Could not load products.</p></section>;
+  return <section><header className="mb-7 flex items-end justify-between gap-4"><div><p className="mb-2 text-sm text-[var(--gold)]">Catalog</p><h1 className="text-3xl font-semibold tracking-tight">Products</h1><p className="mt-2 text-sm text-[var(--muted)]">{products.length} products loaded from Supabase.</p></div></header><div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)]"><div className="divide-y divide-[var(--line)]">{products.length===0?<div className="p-8 text-sm text-[var(--muted)]">No products yet.</div>:products.map((product)=>{const units=product.product_variants.reduce((sum,v)=>sum+v.quantity,0);const low=product.product_variants.filter(v=>v.quantity>0&&v.quantity<=v.minimum_quantity).length;return <article key={product.id} className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between"><div><div className="font-medium">{product.name}</div><div className="mt-1 text-xs text-[var(--muted)]">{product.categories?.name??"Uncategorized"} · {product.slug}</div></div><div className="flex gap-5 text-right text-xs"><div><div className="text-[var(--muted)]">SKUs</div><div className="mt-1 font-medium">{product.product_variants.length}</div></div><div><div className="text-[var(--muted)]">Units</div><div className="mt-1 font-medium">{units}</div></div><div><div className="text-[var(--muted)]">Low</div><div className="mt-1 font-medium">{low}</div></div><div><div className="text-[var(--muted)]">Status</div><div className="mt-1 font-medium">{product.active?"Active":"Draft"}</div></div></div></article>})}</div></div></section>;
+}
