@@ -5,7 +5,7 @@ import { productCardSchema } from "@/lib/ai/schema";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_REQUEST_BYTES = 10_000_000;
-const inputSchema = z.object({ imageBase64: z.string().min(100).max(8_500_000), mimeType: z.enum(["image/jpeg","image/png","image/webp"]), category: z.string().min(1).max(100), material: z.string().max(100).optional(), color: z.string().max(100).optional(), size: z.string().max(100).optional(), price: z.number().nonnegative().optional() });
+const inputSchema = z.object({ imageBase64: z.string().min(100).max(8_500_000), sourceImagePath: z.string().max(300).optional(), mimeType: z.enum(["image/jpeg","image/png","image/webp"]), category: z.string().min(1).max(100), material: z.string().max(100).optional(), color: z.string().max(100).optional(), size: z.string().max(100).optional(), price: z.number().nonnegative().optional() });
 
 export async function POST(request: NextRequest) {
   const contentLength = Number(request.headers.get("content-length") ?? 0);
@@ -23,14 +23,15 @@ export async function POST(request: NextRequest) {
   const parsed = inputSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   try {
-    const result = productCardSchema.safeParse(JSON.parse(String(await new GeminiProvider().generateProductCard(parsed.data))));
+    const generated = await new GeminiProvider().generateProductCard(parsed.data);
+    const result = productCardSchema.safeParse(JSON.parse(String(generated)));
     if (!result.success) return NextResponse.json({ error: "AI output failed schema validation" }, { status: 502 });
-    const { error } = await supabase.from("ai_generations").insert({ provider: "gemini", model: "gemini-3.7-flash", prompt_version: "product-card-v2", status: "completed", output: result.data, created_by: user.id });
+    const { error } = await supabase.from("ai_generations").insert({ provider: "gemini", model: "gemini-3.7-flash", prompt_version: "product-card-v2", status: "completed", output: result.data, source_image_path: parsed.data.sourceImagePath ?? null, created_by: user.id });
     if (error) return NextResponse.json({ error: "Could not persist AI generation" }, { status: 500 });
     return NextResponse.json(result.data);
   } catch (error) {
     const message = error instanceof Error ? error.message : "AI generation failed";
-    await supabase.from("ai_generations").insert({ provider: "gemini", model: "gemini-3.7-flash", prompt_version: "product-card-v2", status: "failed", error_message: message.slice(0,500), created_by: user.id });
+    await supabase.from("ai_generations").insert({ provider: "gemini", model: "gemini-3.7-flash", prompt_version: "product-card-v2", status: "failed", error_message: message.slice(0,500), source_image_path: parsed.data.sourceImagePath ?? null, created_by: user.id });
     return NextResponse.json({ error: "AI generation failed" }, { status: 500 });
   }
 }
