@@ -7,6 +7,23 @@
   --muted: #766f65;
   --line: #e6dfd2;
   --gold: #9b7b47;
+  --success: #2f6b4f;
+  --danger: #a34d46;
+  --warning: #9a6d26;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #101211;
+    --foreground: #f4f1e9;
+    --card: #171918;
+    --muted: #9c9a92;
+    --line: #2b2f2c;
+    --gold: #c5a36a;
+    --success: #6da58a;
+    --danger: #db7b72;
+    --warning: #d5ab62;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -16,5 +33,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 button, input, select, textarea { font: inherit; }
+::selection { background: color-mix(in srgb, var(--gold) 22%, transparent); }
+
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fade-in { animation: fade-in 220ms ease-out both; }
