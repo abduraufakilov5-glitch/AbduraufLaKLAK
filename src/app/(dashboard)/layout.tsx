@@ -14,7 +14,7 @@ export default async function DashboardLayout({ children }: Readonly<{ children:
       <main className="min-w-0 flex-1">
         <MobileNav />
         <RealtimeRefresh />
-        <div className="mx-auto max-w-7xl px-4 pb-32 pt-5 sm:p-8 sm:pb-10 md:pb-10">{children}</div>
+        <div className="mx-auto w-full max-w-7xl px-4 pb-[104px] pt-4 sm:p-8 sm:pb-10 md:pb-10">{children}</div>
       </main>
     </div>
   );
