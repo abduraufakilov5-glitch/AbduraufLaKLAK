@@ -6,4 +6,5 @@ out
 .env.*.local
 coverage
 *.log
-.DS_Store
+.DS_Storetsconfig.tsbuildinfo
+tsconfig.tsbuildinfo
