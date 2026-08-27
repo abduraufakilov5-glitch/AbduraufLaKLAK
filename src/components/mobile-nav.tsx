@@ -2,25 +2,19 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { BarChart3, Bell, Boxes, LayoutDashboard, MoreHorizontal, Package, Settings, ShoppingBag } from "lucide-react";
+import { Bell, Boxes, LayoutDashboard, MoreHorizontal, Package, Settings, Sparkles } from "lucide-react";
 
 const primary = [
   ["Обзор", "/dashboard", LayoutDashboard],
   ["Товары", "/products", Package],
-  ["Склад", "/inventory", Boxes],
-  ["Заказы", "/orders", ShoppingBag],
+  ["Остатки", "/inventory", Boxes],
+  ["AI", "/ai-studio", Sparkles],
 ] as const;
 
 const secondary = [
-  ["Аналитика", "/analytics", BarChart3],
-  ["AI Studio", "/ai-studio", SparklesIcon],
   ["Уведомления", "/notifications", Bell],
   ["Настройки", "/settings", Settings],
 ] as const;
-
-function SparklesIcon(props: { size?: number; strokeWidth?: number }) {
-  return <span className="inline-flex" aria-hidden="true"><span style={{ fontSize: props.size ?? 20, lineHeight: 1 }}>✦</span></span>;
-}
 
 const routes = [...primary, ...secondary];
 
