@@ -2,21 +2,25 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { BarChart3, Bell, Boxes, LayoutDashboard, MoreHorizontal, Package, Settings, ShoppingBag, Sparkles } from "lucide-react";
+import { BarChart3, Bell, Boxes, LayoutDashboard, MoreHorizontal, Package, Settings, ShoppingBag } from "lucide-react";
 
 const primary = [
   ["Обзор", "/dashboard", LayoutDashboard],
   ["Товары", "/products", Package],
   ["Склад", "/inventory", Boxes],
   ["Заказы", "/orders", ShoppingBag],
-  ["AI", "/ai-studio", Sparkles],
 ] as const;
 
 const secondary = [
   ["Аналитика", "/analytics", BarChart3],
+  ["AI Studio", "/ai-studio", SparklesIcon],
   ["Уведомления", "/notifications", Bell],
   ["Настройки", "/settings", Settings],
 ] as const;
+
+function SparklesIcon(props: { size?: number; strokeWidth?: number }) {
+  return <span className="inline-flex" aria-hidden="true"><span style={{ fontSize: props.size ?? 20, lineHeight: 1 }}>✦</span></span>;
+}
 
 const routes = [...primary, ...secondary];
 
@@ -31,41 +35,32 @@ export function MobileNav() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[color:var(--background)]/94 px-4 py-3 backdrop-blur-xl md:hidden">
+      <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[color:var(--background)]/95 px-4 py-3 backdrop-blur-md md:hidden">
         <div className="flex min-h-9 items-center justify-between gap-3">
           <Link href="/dashboard" prefetch className="flex min-w-0 items-center gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-[11px] bg-[var(--foreground)] text-sm font-semibold text-[var(--background)]">D</span>
-            <span className="truncate text-[15px] font-semibold tracking-tight">Dilyas Shop</span>
+            <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[var(--rose-600)] text-sm font-semibold text-white">D</span>
+            <span className="truncate text-[15px] font-medium tracking-tight">Dilyas Shop</span>
           </Link>
-          <Link href="/notifications" prefetch aria-label="Уведомления" className="grid size-10 shrink-0 place-items-center rounded-xl border border-[var(--line)] bg-[var(--card)] text-[var(--muted)] transition active:scale-95">
-            <Bell size={20} strokeWidth={1.9} />
+          <Link href="/notifications" prefetch aria-label="Уведомления" className="grid size-10 shrink-0 place-items-center rounded-[8px] border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] active:bg-[var(--surface-muted)]">
+            <Bell size={20} strokeWidth={1.8} />
           </Link>
         </div>
       </header>
-
-      <nav aria-label="Основная навигация" className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-[color:var(--card)]/97 px-2 pt-2 shadow-[0_-8px_30px_rgba(31,26,20,0.08)] backdrop-blur-xl md:hidden" style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
-        <div className="mx-auto grid max-w-lg grid-cols-6 gap-1">
+      <nav aria-label="Основная навигация" className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-[var(--surface)] px-2 pt-2 md:hidden" style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}>
+        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
           {primary.map(([label, href, Icon]) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
-            return (
-              <Link key={href} href={href} prefetch className={`flex min-h-[60px] flex-col items-center justify-center gap-1.5 rounded-xl px-1 text-[10px] font-medium transition active:scale-95 ${active ? "bg-[color:var(--background)] text-[var(--foreground)]" : "text-[var(--muted)]"}`}>
-                <Icon size={22} strokeWidth={active ? 2.2 : 1.9} />
-                <span>{label}</span>
-              </Link>
-            );
+            return <Link key={href} href={href} prefetch className={`flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-[8px] px-1 text-[11px] font-medium transition-colors active:bg-[var(--surface-muted)] ${active ? "text-[var(--rose-600)]" : "text-[var(--text-muted)]"}`}>
+              <Icon size={23} strokeWidth={active ? 2.1 : 1.8} />
+              <span>{label}</span>
+            </Link>;
           })}
           <details className="relative">
-            <summary className={`flex min-h-[60px] cursor-pointer list-none flex-col items-center justify-center gap-1.5 rounded-xl px-1 text-[10px] font-medium transition active:scale-95 ${secondaryActive ? "bg-[color:var(--background)] text-[var(--foreground)]" : "text-[var(--muted)]"} [&::-webkit-details-marker]:hidden`}>
-              <MoreHorizontal size={23} strokeWidth={1.9} />
-              <span>Ещё</span>
+            <summary className={`flex min-h-[48px] cursor-pointer list-none flex-col items-center justify-center gap-1 rounded-[8px] px-1 text-[11px] font-medium [&::-webkit-details-marker]:hidden ${secondaryActive ? "text-[var(--rose-600)]" : "text-[var(--text-muted)]"}`}>
+              <MoreHorizontal size={23} strokeWidth={1.8} /><span>Ещё</span>
             </summary>
-            <div className="absolute bottom-[68px] right-0 w-52 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] p-1.5 shadow-2xl">
-              {secondary.map(([label, href, Icon]) => (
-                <Link key={href} href={href} prefetch className="flex min-h-12 items-center gap-3 rounded-xl px-3 py-3 text-sm text-[var(--muted)] active:bg-[color:var(--background)]">
-                  <Icon size={19} />
-                  <span>{label}</span>
-                </Link>
-              ))}
+            <div className="absolute bottom-[56px] right-0 w-52 overflow-hidden rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-1">
+              {secondary.map(([label, href, Icon]) => <Link key={href} href={href} prefetch className="flex min-h-12 items-center gap-3 rounded-[8px] px-3 py-3 text-[13px] text-[var(--text-secondary)] active:bg-[var(--surface-muted)]"><Icon size={19}/><span>{label}</span></Link>)}
             </div>
           </details>
         </div>
