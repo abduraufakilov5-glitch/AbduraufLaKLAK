@@ -1,6 +1,14 @@
 # Dilyas Shop
 
-Production-oriented inventory, orders, analytics and AI content management app for a Muslim scarf and hijab store. Dilyas Shop is the store brand; Lak Lak is the marketplace where products may be listed.
+AI-first catalog and stock management app for a Muslim scarf and hijab store launching online on the Lak Lak marketplace.
+
+## Main workflow
+
+1. Upload a product photo.
+2. Enter the product name, material, color, size, cost price, selling price and quantity.
+3. Gemini generates four Russian-language blocks: Instagram post, Lak Lak title, Lak Lak description and a ready prompt for an external image-generation AI.
+4. Save the product to the catalog with its original photo, prices, quantity and generated content.
+5. Update stock daily with simple **Приход** or **Продажа** movements.
 
 ## Stack
 
@@ -11,11 +19,9 @@ Production-oriented inventory, orders, analytics and AI content management app f
 - Google Gemini via `@google/genai`
 - Zod validation
 
-## AI Studio
+## Storage
 
-- Generates Russian/Tajik product copy, SEO fields, characteristics and Lak Lak marketplace tags.
-- Generates marketplace-ready product card images with Gemini `gemini-3.1-flash-image`.
-- Keeps original and generated images in separate private Storage buckets.
+Original product photos are kept in the private `product-images` bucket. The app creates short-lived signed URLs for catalog previews.
 
 ## Development
 
@@ -23,4 +29,4 @@ Production-oriented inventory, orders, analytics and AI content management app f
 2. Install dependencies with `npm install`.
 3. Run `npm run dev`.
 
-Database schema is managed exclusively through `supabase/migrations`.
+Database schema is managed through `supabase/migrations`.
