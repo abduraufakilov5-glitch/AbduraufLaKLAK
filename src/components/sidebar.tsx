@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { BarChart3, Bell, Boxes, LayoutDashboard, Package, Settings, ShoppingBag, Sparkles } from "lucide-react";
+import { Bell, Boxes, LayoutDashboard, Package, Settings, Sparkles } from "lucide-react";
 
 const items = [
   ["Обзор", "/dashboard", LayoutDashboard],
   ["Товары", "/products", Package],
   ["Остатки", "/inventory", Boxes],
-  ["Заказы", "/orders", ShoppingBag],
-  ["Аналитика", "/analytics", BarChart3],
   ["AI Studio", "/ai-studio", Sparkles],
   ["Уведомления", "/notifications", Bell],
   ["Настройки", "/settings", Settings],
@@ -20,7 +18,7 @@ export function Sidebar() {
           <span className="grid size-9 place-items-center rounded-[10px] bg-[var(--rose-600)] text-sm font-semibold text-white">D</span>
           <span>
             <span className="block text-sm font-medium tracking-tight">Dilyas Shop</span>
-            <span className="mt-0.5 block text-[11px] text-[var(--muted)]">Управление магазином</span>
+            <span className="mt-0.5 block text-[11px] text-[var(--muted)]">AI и управление каталогом</span>
           </span>
         </Link>
       </div>
@@ -35,7 +33,7 @@ export function Sidebar() {
           ))}
         </div>
       </nav>
-      <div className="border-t border-[var(--line)] px-5 py-4 text-[11px] text-[var(--text-muted)]">Dilyas Shop · магазин</div>
+      <div className="border-t border-[var(--line)] px-5 py-4 text-[11px] text-[var(--text-muted)]">Dilyas Shop · каталог</div>
     </aside>
   );
 }
