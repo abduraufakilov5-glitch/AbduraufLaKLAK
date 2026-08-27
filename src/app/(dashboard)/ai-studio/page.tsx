@@ -2,40 +2,157 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, Check, ChevronRight, Copy, ImagePlus, Sparkles } from "lucide-react";
 
 interface ProductCard { instagram_text: string; marketplace_title: string; marketplace_description: string; image_prompt: string }
+
+type Step = 1 | 2 | 3 | 4;
 function makeSku() { return `DS-${crypto.randomUUID().slice(0, 8).toUpperCase()}`; }
 
 export default function AIStudioPage() {
   const router = useRouter();
-  const [file, setFile] = useState<File | null>(null); const [preview, setPreview] = useState(""); const [name, setName] = useState(""); const [category, setCategory] = useState("Платок"); const [material, setMaterial] = useState(""); const [color, setColor] = useState(""); const [size, setSize] = useState(""); const [costPrice, setCostPrice] = useState(""); const [sellingPrice, setSellingPrice] = useState(""); const [quantity, setQuantity] = useState("0"); const [minimumQuantity, setMinimumQuantity] = useState("1"); const [uploadedPath, setUploadedPath] = useState(""); const [result, setResult] = useState<ProductCard | null>(null); const [loading, setLoading] = useState(false); const [saving, setSaving] = useState(false); const [error, setError] = useState(""); const [saved, setSaved] = useState(false);
+  const [step, setStep] = useState<Step>(1);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("Платок");
+  const [material, setMaterial] = useState("");
+  const [color, setColor] = useState("");
+  const [size, setSize] = useState("");
+  const [costPrice, setCostPrice] = useState("");
+  const [sellingPrice, setSellingPrice] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [minimumQuantity, setMinimumQuantity] = useState("1");
+  const [uploadedPath, setUploadedPath] = useState("");
+  const [result, setResult] = useState<ProductCard | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [copied, setCopied] = useState("");
 
-  useEffect(() => { if (!file) { setPreview(""); return; } const url = URL.createObjectURL(file); setPreview(url); return () => URL.revokeObjectURL(url); }, [file]);
-  function resetResult() { setResult(null); setUploadedPath(""); setSaved(false); setError(""); }
-  async function uploadPhoto() { if (!file) throw new Error("Выбери фото товара"); if (file.size > 5 * 1024 * 1024) throw new Error("Фото должно быть меньше 5 МБ"); const form = new FormData(); form.append("file", file); const response = await fetch("/api/uploads/product-image", { method: "POST", body: form }); const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "Не удалось загрузить фото"); setUploadedPath(data.path); return data.path as string; }
-  async function generate() { setLoading(true); setError(""); setSaved(false); try { const path = uploadedPath || await uploadPhoto(); const imageBase64 = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(",")[1] ?? ""); reader.onerror = () => reject(new Error("Не удалось прочитать фото")); reader.readAsDataURL(file!); }); const response = await fetch("/api/ai/product-card", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ imageBase64, sourceImagePath: path, mimeType: file!.type, name, category, material: material || undefined, color: color || undefined, size: size || undefined, sellingPrice: sellingPrice ? Number(sellingPrice) : undefined }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "Не удалось создать контент"); setResult(data as ProductCard); } catch (e) { setError(e instanceof Error ? e.message : "Ошибка генерации"); } finally { setLoading(false); } }
-  async function saveProduct() { if (!result || !uploadedPath) return; setSaving(true); setError(""); try { const response = await fetch("/api/products", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, category_name: category, image_path: uploadedPath, marketplace_title: result.marketplace_title, marketplace_description: result.marketplace_description, instagram_text: result.instagram_text, image_prompt: result.image_prompt, variant: { sku: makeSku(), color: color || undefined, material: material || undefined, size: size || undefined, cost_price: Number(costPrice || 0), selling_price: Number(sellingPrice || 0), quantity: Number(quantity || 0), minimum_quantity: Number(minimumQuantity || 0) } }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "Не удалось сохранить товар"); setSaved(true); router.refresh(); } catch (e) { setError(e instanceof Error ? e.message : "Не удалось сохранить товар"); } finally { setSaving(false); } }
-  const field = (label: string, value: string, setter: (value: string) => void, placeholder: string, type = "text") => <label className="block text-xs font-medium text-[var(--muted)]">{label}<input type={type} value={value} onChange={(event) => setter(event.target.value)} placeholder={placeholder} min={type === "number" ? "0" : undefined} className="mt-1.5 min-h-12 w-full rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 py-3 text-[16px] leading-5 outline-none transition focus:border-[var(--gold)] focus:ring-0" /></label>;
-  const copy = async (text: string) => { await navigator.clipboard.writeText(text); };
+  useEffect(() => {
+    if (!file) { setPreview(""); return; }
+    const url = URL.createObjectURL(file); setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
 
-  return <section className="animate-fade-in space-y-4 sm:space-y-6">
-    <header className="sm:pt-0"><p className="mb-1 text-xs font-medium text-[var(--gold)]">AI Studio</p><h1 className="text-[27px] font-semibold leading-tight tracking-tight sm:text-4xl">Создать товар</h1><p className="mt-2 max-w-2xl text-sm leading-5 text-[var(--muted)]">Одно фото → контент для Instagram, Lak Lak и промпт для визуала.</p></header>
-    <div className="grid gap-3 xl:grid-cols-[380px_1fr]">
-      <div className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4 sm:p-6">
-        <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)]">
-          {preview ? <img src={preview} alt="Фото товара" className="aspect-[4/3] w-full object-cover sm:aspect-square" /> : <div className="grid aspect-[4/3] place-items-center p-8 text-center sm:aspect-square"><div><div className="text-4xl">📷</div><p className="mt-3 text-sm font-medium">Добавь фото платка</p><p className="mt-1 text-xs text-[var(--muted)]">JPG, PNG или WebP · до 5 МБ</p></div></div>}
-          <label className="block cursor-pointer border-t border-[var(--line)] bg-[var(--card)] px-4 py-3.5 text-center text-sm font-medium active:bg-[var(--surface-muted)]">{file ? "Заменить фото" : "Выбрать фото"}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => { setFile(event.target.files?.[0] ?? null); resetResult(); }} /></label>
+  function resetFromPhoto() { setUploadedPath(""); setResult(null); setSaved(false); setError(""); setStep(1); }
+
+  async function uploadPhoto() {
+    if (!file) throw new Error("Добавь фото товара");
+    if (file.size > 5 * 1024 * 1024) throw new Error("Фото должно быть меньше 5 МБ");
+    const form = new FormData(); form.append("file", file);
+    const response = await fetch("/api/uploads/product-image", { method: "POST", body: form });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error ?? "Не удалось загрузить фото");
+    setUploadedPath(data.path); return data.path as string;
+  }
+
+  async function generate() {
+    setLoading(true); setError("");
+    try {
+      const path = uploadedPath || await uploadPhoto();
+      const imageBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(",")[1] ?? ""); reader.onerror = () => reject(new Error("Не удалось прочитать фото")); reader.readAsDataURL(file!);
+      });
+      const response = await fetch("/api/ai/product-card", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ imageBase64, sourceImagePath: path, mimeType: file!.type, name, category, material: material || undefined, color: color || undefined, size: size || undefined, sellingPrice: sellingPrice ? Number(sellingPrice) : undefined }),
+      });
+      const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "Не удалось создать контент");
+      setResult(data as ProductCard); setStep(4);
+    } catch (e) { setError(e instanceof Error ? e.message : "Ошибка генерации"); }
+    finally { setLoading(false); }
+  }
+
+  async function saveProduct() {
+    if (!result || !uploadedPath) return;
+    setSaving(true); setError("");
+    try {
+      const response = await fetch("/api/products", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, category_name: category, image_path: uploadedPath, marketplace_title: result.marketplace_title, marketplace_description: result.marketplace_description, instagram_text: result.instagram_text, image_prompt: result.image_prompt, variant: { sku: makeSku(), color: color || undefined, material: material || undefined, size: size || undefined, cost_price: Number(costPrice || 0), selling_price: Number(sellingPrice || 0), quantity: Number(quantity || 0), minimum_quantity: Number(minimumQuantity || 0) } }),
+      });
+      const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "Не удалось сохранить товар");
+      setSaved(true); router.refresh();
+    } catch (e) { setError(e instanceof Error ? e.message : "Не удалось сохранить товар"); }
+    finally { setSaving(false); }
+  }
+
+  async function copyText(label: string, text: string) {
+    try { await navigator.clipboard.writeText(text); setCopied(label); window.setTimeout(() => setCopied(""), 1400); } catch { setCopied(""); }
+  }
+
+  const input = (label: string, value: string, setter: (value: string) => void, placeholder: string, type = "text") => (
+    <label className="block"><span className="mb-1.5 block text-xs font-medium text-[var(--muted)]">{label}</span><input type={type} inputMode={type === "number" ? "decimal" : undefined} value={value} onChange={event => setter(event.target.value)} placeholder={placeholder} min={type === "number" ? "0" : undefined} className="w-full rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3.5 py-3 text-[16px] leading-5 outline-none transition focus:border-[var(--rose-400)] focus:ring-0" /></label>
+  );
+
+  const stepLabel = step === 1 ? "Фото" : step === 2 ? "Данные" : step === 3 ? "Цена" : "Результат";
+
+  return (
+    <section className="mobile-create-page animate-fade-in">
+      <header className="mobile-create-header">
+        <button type="button" onClick={() => step > 1 ? setStep((step - 1) as Step) : router.push("/dashboard")} className="mobile-back-button" aria-label="Назад"><ArrowLeft size={20}/></button>
+        <div className="min-w-0"><p className="text-[11px] font-medium text-[var(--rose-600)]">Новый товар</p><h1 className="truncate text-[20px] font650 tracking-tight">{stepLabel}</h1></div>
+        <span className="mobile-step-counter">{step}/4</span>
+      </header>
+
+      <div className="mobile-stepper" aria-label="Прогресс создания товара">
+        {[1,2,3,4].map(value => <span key={value} className={`mobile-step-dot ${value <= step ? "is-done" : ""} ${value === step ? "is-current" : ""}`}/>) }
+      </div>
+
+      {step === 1 && (
+        <div className="mobile-create-flow">
+          <div className="mobile-hero-copy"><p className="text-[13px] font-medium text-[var(--muted)]">Шаг 1</p><h2 className="mt-1 text-[28px] font-bold tracking-[-.04em]">Сфотографируй товар</h2><p className="mt-2 text-[14px] leading-5 text-[var(--muted)]">Одно хорошее фото — и Gemini подготовит всё остальное.</p></div>
+          <label className="mobile-photo-picker">
+            {preview ? <img src={preview} alt="Фото товара" className="mobile-photo-picker__image"/> : <div className="mobile-photo-picker__empty"><span className="mobile-photo-picker__icon"><ImagePlus size={28}/></span><strong>Добавить фото</strong><span>Камера или медиатека</span></div>}
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={event => { setFile(event.target.files?.[0] ?? null); resetFromPhoto(); }}/>
+          </label>
+          {preview && <label className="mobile-photo-change">Заменить фото<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={event => { setFile(event.target.files?.[0] ?? null); resetFromPhoto(); }}/></label>}
+          {error && <p className="mobile-error">{error}</p>}
+          <button type="button" disabled={!file} onClick={() => setStep(2)} className="mobile-primary-button">Продолжить <ChevronRight size={18}/></button>
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">{field("Название", name, setName, "Шёлковый платок")}{field("Категория", category, setCategory, "Платок")}{field("Материал", material, setMaterial, "Шёлк")}{field("Цвет", color, setColor, "Молочный")}{field("Размер", size, setSize, "70×70 см")}{field("Себестоимость", costPrice, setCostPrice, "35", "number")}{field("Цена продажи", sellingPrice, setSellingPrice, "65", "number")}{field("Количество", quantity, setQuantity, "5", "number")}{field("Минимальный остаток", minimumQuantity, setMinimumQuantity, "1", "number")}</div>
-        {error && <p role="alert" className="mt-4 rounded-xl bg-[color:var(--danger)]/10 px-3 py-2.5 text-xs leading-5 text-[var(--danger)]">{error}</p>}
-        <button disabled={!file || !name.trim() || loading || saving} onClick={() => void generate()} className="mt-4 min-h-12 w-full rounded-xl bg-[var(--foreground)] px-4 py-3 text-sm font-semibold text-[var(--background)] shadow-sm transition active:scale-[.99] disabled:opacity-40">{loading ? "Gemini создаёт…" : "Создать контент"}</button>
-      </div>
-      <div className="space-y-3 sm:space-y-4">
-        {!result ? <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface-muted)] p-6 text-center sm:min-h-[520px] sm:grid sm:place-items-center"><div><div className="text-3xl">✦</div><h2 className="mt-3 text-sm font-semibold">Результат появится здесь</h2><p className="mt-1.5 text-sm leading-5 text-[var(--muted)]">После генерации здесь будут 4 отдельных блока, каждый можно скопировать.</p></div></div> : <>
-          {[["Instagram", result.instagram_text], ["Lak Lak — заголовок", result.marketplace_title], ["Lak Lak — описание", result.marketplace_description], ["Промпт для изображения", result.image_prompt]].map(([label, text]) => <div key={label} className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4 sm:p-6"><div className="flex items-center justify-between gap-3"><p className="text-sm font-semibold">{label}</p><button type="button" onClick={() => void copy(text)} className="shrink-0 rounded-lg border border-[var(--line)] px-3 py-2 text-xs font-medium active:bg-[var(--surface-muted)]">Копировать</button></div><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[var(--text-primary)]">{text}</p></div>)}
-          <div className="sticky bottom-[86px] z-20 rounded-2xl border border-[var(--line)] bg-[color:var(--surface)]/95 p-4 shadow-[0_-8px_28px_rgba(36,34,32,.07)] backdrop-blur-md sm:static sm:flex sm:items-center sm:justify-between sm:shadow-none"><div className="hidden sm:block"><p className="text-sm font-medium">Сохранить товар</p><p className="mt-1 text-xs text-[var(--muted)]">Фото, цены, остаток и AI-контент.</p></div><button type="button" disabled={saving || saved} onClick={() => void saveProduct()} className="min-h-12 w-full rounded-xl bg-[var(--foreground)] px-4 py-3 text-sm font-semibold text-[var(--background)] disabled:opacity-50 sm:w-auto">{saved ? "Сохранено ✓" : saving ? "Сохраняем…" : "Сохранить в каталог"}</button></div>
-        </>}
-      </div>
-    </div>
-  </section>;
+      )}
+
+      {step === 2 && (
+        <div className="mobile-create-flow">
+          <div className="mobile-hero-copy"><p className="text-[13px] font-medium text-[var(--muted)]">Шаг 2</p><h2 className="mt-1 text-[27px] font-bold tracking-[-.04em]">Что это за товар?</h2><p className="mt-2 text-[14px] leading-5 text-[var(--muted)]">Введи только то, что знаешь. Неизвестное Gemini не будет выдумывать.</p></div>
+          <div className="mobile-form-card">
+            {input("Название", name, setName, "Шёлковый платок")}
+            {input("Категория", category, setCategory, "Платок")}
+            {input("Материал", material, setMaterial, "Шёлк")}
+            {input("Цвет", color, setColor, "Молочный")}
+            {input("Размер", size, setSize, "70×70 см")}
+          </div>
+          {error && <p className="mobile-error">{error}</p>}
+          <button type="button" disabled={!name.trim()} onClick={() => setStep(3)} className="mobile-primary-button">Дальше <ChevronRight size={18}/></button>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="mobile-create-flow">
+          <div className="mobile-hero-copy"><p className="text-[13px] font-medium text-[var(--muted)]">Шаг 3</p><h2 className="mt-1 text-[27px] font-bold tracking-[-.04em]">Цена и остаток</h2><p className="mt-2 text-[14px] leading-5 text-[var(--muted)]">Эти данные сохранятся вместе с товаром и помогут следить за прибылью.</p></div>
+          <div className="mobile-form-card">
+            {input("Себестоимость, TJS", costPrice, setCostPrice, "35", "number")}
+            {input("Цена продажи, TJS", sellingPrice, setSellingPrice, "65", "number")}
+            {input("Количество, шт.", quantity, setQuantity, "5", "number")}
+            {input("Минимальный остаток", minimumQuantity, setMinimumQuantity, "1", "number")}
+            <div className="mobile-profit-preview"><span>Прибыль с единицы</span><strong>{Math.max(0, Number(sellingPrice || 0) - Number(costPrice || 0)).toLocaleString("ru-RU")} TJS</strong></div>
+          </div>
+          {error && <p className="mobile-error">{error}</p>}
+          <button type="button" disabled={!sellingPrice || loading} onClick={() => void generate()} className="mobile-primary-button">{loading ? <><span className="mobile-spinner"/> Gemini создаёт…</> : <><Sparkles size={18}/> Создать контент</>}</button>
+        </div>
+      )}
+
+      {step === 4 && result && (
+        <div className="mobile-create-flow mobile-result-flow">
+          <div className="mobile-result-hero"><span className="mobile-success-icon"><Check size={19}/></span><div><p className="text-[13px] font-semibold">Готово</p><p className="mt-0.5 text-xs text-[var(--muted)]">Gemini подготовил контент для товара</p></div></div>
+          {[ ["Instagram", result.instagram_text], ["Lak Lak — заголовок", result.marketplace_title], ["Lak Lak — описание", result.marketplace_description], ["Промпт для изображения", result.image_prompt] ].map(([label, text]) => <article key={label} className="mobile-result-card"><div className="flex items-center justify-between gap-3"><h3>{label}</h3><button type="button" onClick={() => void copyText(label, text)} className="mobile-copy-button">{copied === label ? <><Check size={14}/> Скопировано</> : <><Copy size={14}/> Копировать</>}</button></div><p>{text}</p></article>)}
+          {error && <p className="mobile-error">{error}</p>}
+          <div className="mobile-save-bar"><div><p className="text-sm font-semibold">Добавить в каталог</p><p className="mt-0.5 text-xs text-[var(--muted)]">Фото, цена, остаток и AI-контент</p></div><button type="button" disabled={saving || saved} onClick={() => void saveProduct()}>{saved ? "Сохранено ✓" : saving ? "Сохраняю…" : "Сохранить"}</button></div>
+        </div>
+      )}
+    </section>
+  );
 }
