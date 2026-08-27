@@ -5,9 +5,9 @@ import { useEffect } from "react";
 import { Bell, Boxes, LayoutDashboard, MoreHorizontal, Package, Settings, Sparkles } from "lucide-react";
 
 const primary = [
-  ["Обзор", "/dashboard", LayoutDashboard],
+  ["Главная", "/dashboard", LayoutDashboard],
   ["Товары", "/products", Package],
-  ["Остатки", "/inventory", Boxes],
+  ["Склад", "/inventory", Boxes],
   ["AI", "/ai-studio", Sparkles],
 ] as const;
 
@@ -29,32 +29,38 @@ export function MobileNav() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[color:var(--background)]/95 px-4 py-3 backdrop-blur-md md:hidden">
-        <div className="flex min-h-9 items-center justify-between gap-3">
-          <Link href="/dashboard" prefetch className="flex min-w-0 items-center gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[var(--rose-600)] text-sm font-semibold text-white">D</span>
-            <span className="truncate text-[15px] font-medium tracking-tight">Dilyas Shop</span>
-          </Link>
-          <Link href="/notifications" prefetch aria-label="Уведомления" className="grid size-10 shrink-0 place-items-center rounded-[8px] border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] active:bg-[var(--surface-muted)]">
-            <Bell size={20} strokeWidth={1.8} />
-          </Link>
-        </div>
+      <header className="mobile-topbar">
+        <Link href="/dashboard" prefetch className="mobile-brand">
+          <span className="mobile-brand__mark">D</span>
+          <span className="mobile-brand__text">Dilyas Shop</span>
+        </Link>
+        <Link href="/notifications" prefetch aria-label="Уведомления" className="mobile-icon-button">
+          <Bell size={19} strokeWidth={1.9} />
+        </Link>
       </header>
-      <nav aria-label="Основная навигация" className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-[var(--surface)] px-2 pt-2 md:hidden" style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}>
-        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
+      <nav aria-label="Основная навигация" className="mobile-tabbar">
+        <div className="mobile-tabbar__inner">
           {primary.map(([label, href, Icon]) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
-            return <Link key={href} href={href} prefetch className={`flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-[8px] px-1 text-[11px] font-medium transition-colors active:bg-[var(--surface-muted)] ${active ? "text-[var(--rose-600)]" : "text-[var(--text-muted)]"}`}>
-              <Icon size={23} strokeWidth={active ? 2.1 : 1.8} />
-              <span>{label}</span>
-            </Link>;
+            return (
+              <Link key={href} href={href} prefetch className={`mobile-tab ${active ? "is-active" : ""}`}>
+                <span className="mobile-tab__icon"><Icon size={20} strokeWidth={active ? 2.15 : 1.8} /></span>
+                <span>{label}</span>
+              </Link>
+            );
           })}
-          <details className="relative">
-            <summary className={`flex min-h-[48px] cursor-pointer list-none flex-col items-center justify-center gap-1 rounded-[8px] px-1 text-[11px] font-medium [&::-webkit-details-marker]:hidden ${secondaryActive ? "text-[var(--rose-600)]" : "text-[var(--text-muted)]"}`}>
-              <MoreHorizontal size={23} strokeWidth={1.8} /><span>Ещё</span>
+          <details className="mobile-more">
+            <summary className={`mobile-tab ${secondaryActive ? "is-active" : ""}`}>
+              <span className="mobile-tab__icon"><MoreHorizontal size={20} strokeWidth={1.9} /></span>
+              <span>Ещё</span>
             </summary>
-            <div className="absolute bottom-[56px] right-0 w-52 overflow-hidden rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-1">
-              {secondary.map(([label, href, Icon]) => <Link key={href} href={href} prefetch className="flex min-h-12 items-center gap-3 rounded-[8px] px-3 py-3 text-[13px] text-[var(--text-secondary)] active:bg-[var(--surface-muted)]"><Icon size={19}/><span>{label}</span></Link>)}
+            <div className="mobile-more__menu">
+              {secondary.map(([label, href, Icon]) => (
+                <Link key={href} href={href} prefetch className="mobile-more__item">
+                  <Icon size={18} strokeWidth={1.9} />
+                  <span>{label}</span>
+                </Link>
+              ))}
             </div>
           </details>
         </div>
