@@ -8,16 +8,23 @@ export const metadata: Metadata = {
   },
   description: "AI-каталог Dilyas Shop: товары, контент и остатки.",
   applicationName: "Dilyas Shop",
+  formatDetection: {
+    telephone: false,
+    date: false,
+    address: false,
+    email: false,
+  },
   appleWebApp: {
     capable: true,
     title: "Dilyas Shop",
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  minimumScale: 1,
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
