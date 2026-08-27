@@ -2,22 +2,17 @@ import { describe, expect, it } from "vitest";
 import { productCardSchema } from "./schema";
 
 describe("productCardSchema", () => {
-  it("accepts a complete structured card", () => {
+  it("accepts the four required content outputs", () => {
     const result = productCardSchema.safeParse({
-      seo_title_ru: "Платок",
-      seo_title_tg: "Рӯймол",
-      description_ru: "Описание",
-      description_tg: "Тавсиф",
-      short_description: "Коротко",
-      characteristics: [{ name: "color", value: "black" }],
-      laklak_tags: ["hijab"],
-      keywords: ["scarf"],
-      hashtags: ["#hijab"],
+      instagram_text: "Лёгкий мусульманский платок для повседневного образа.",
+      marketplace_title: "Мусульманский платок из габардина, чёрный",
+      marketplace_description: "Чёрный платок из габардина. Размер 70×70 см.",
+      image_prompt: "Premium e-commerce product photo of the supplied black scarf...",
     });
     expect(result.success).toBe(true);
   });
 
-  it("rejects missing required output", () => {
-    expect(productCardSchema.safeParse({ seo_title_ru: "Платок" }).success).toBe(false);
+  it("rejects incomplete output", () => {
+    expect(productCardSchema.safeParse({ instagram_text: "Текст" }).success).toBe(false);
   });
 });
