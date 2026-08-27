@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { BarChart3, Bell, Boxes, LayoutDashboard, MoreHorizontal, Package, Settings, ShoppingBag, Sparkles } from "lucide-react";
 
 const primary = [
@@ -17,19 +18,26 @@ const secondary = [
   ["Настройки", "/settings", Settings],
 ] as const;
 
+const routes = [...primary, ...secondary];
+
 export function MobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const secondaryActive = secondary.some(([, href]) => pathname === href || pathname.startsWith(`${href}/`));
+
+  useEffect(() => {
+    for (const [, href] of routes) router.prefetch(href);
+  }, [router]);
 
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[color:var(--background)]/94 px-4 py-3 backdrop-blur-xl md:hidden">
         <div className="flex min-h-9 items-center justify-between gap-3">
-          <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5">
+          <Link href="/dashboard" prefetch className="flex min-w-0 items-center gap-2.5">
             <span className="grid size-9 shrink-0 place-items-center rounded-[11px] bg-[var(--foreground)] text-sm font-semibold text-[var(--background)]">D</span>
             <span className="truncate text-[15px] font-semibold tracking-tight">Dilyas Shop</span>
           </Link>
-          <Link href="/notifications" aria-label="Уведомления" className="grid size-10 shrink-0 place-items-center rounded-xl border border-[var(--line)] bg-[var(--card)] text-[var(--muted)] transition active:scale-95">
+          <Link href="/notifications" prefetch aria-label="Уведомления" className="grid size-10 shrink-0 place-items-center rounded-xl border border-[var(--line)] bg-[var(--card)] text-[var(--muted)] transition active:scale-95">
             <Bell size={20} strokeWidth={1.9} />
           </Link>
         </div>
@@ -40,11 +48,7 @@ export function MobileNav() {
           {primary.map(([label, href, Icon]) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex min-h-[60px] flex-col items-center justify-center gap-1.5 rounded-xl px-1 text-[10px] font-medium transition active:scale-95 ${active ? "bg-[color:var(--background)] text-[var(--foreground)]" : "text-[var(--muted)]"}`}
-              >
+              <Link key={href} href={href} prefetch className={`flex min-h-[60px] flex-col items-center justify-center gap-1.5 rounded-xl px-1 text-[10px] font-medium transition active:scale-95 ${active ? "bg-[color:var(--background)] text-[var(--foreground)]" : "text-[var(--muted)]"}`}>
                 <Icon size={22} strokeWidth={active ? 2.2 : 1.9} />
                 <span>{label}</span>
               </Link>
@@ -57,7 +61,7 @@ export function MobileNav() {
             </summary>
             <div className="absolute bottom-[68px] right-0 w-52 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] p-1.5 shadow-2xl">
               {secondary.map(([label, href, Icon]) => (
-                <Link key={href} href={href} className="flex min-h-12 items-center gap-3 rounded-xl px-3 py-3 text-sm text-[var(--muted)] active:bg-[color:var(--background)]">
+                <Link key={href} href={href} prefetch className="flex min-h-12 items-center gap-3 rounded-xl px-3 py-3 text-sm text-[var(--muted)] active:bg-[color:var(--background)]">
                   <Icon size={19} />
                   <span>{label}</span>
                 </Link>
