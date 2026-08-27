@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     default: "Dilyas Shop",
     template: "%s · Dilyas Shop",
   },
-  description: "Управление магазином: товары, склад, заказы, аналитика и AI Studio.",
+  description: "AI-каталог Dilyas Shop: товары, контент и остатки.",
   applicationName: "Dilyas Shop",
   appleWebApp: {
     capable: true,
@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
   themeColor: "#FAF9F6",
 };
