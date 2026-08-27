@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { ArrowRight, Boxes, Package, Sparkles, TriangleAlert } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 function money(value: number) {
   return `${value.toLocaleString("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} TJS`;
 }
+
+const quickStart: Array<{ num: string; title: string; body: string; href: string; Icon: LucideIcon }> = [
+  { num: "01", title: "Загрузи фото", body: "AI Studio", href: "/ai-studio", Icon: Sparkles },
+  { num: "02", title: "Получи контент", body: "Instagram + Lak Lak + prompt", href: "/ai-studio", Icon: Package },
+  { num: "03", title: "Сохрани товар", body: "Фото, цены и остаток", href: "/products", Icon: Boxes },
+];
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -56,7 +63,7 @@ export default async function DashboardPage() {
         <div className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4 sm:p-6">
           <div className="flex items-center justify-between"><div><h2 className="text-sm font-semibold">Быстрый старт</h2><p className="mt-1 text-xs text-[var(--muted)]">Твой основной рабочий цикл.</p></div></div>
           <div className="mt-4 space-y-2">
-            {[["01","Загрузи фото","AI Studio", "/ai-studio", Sparkles],["02","Получи контент","Instagram + Lak Lak + prompt", "/ai-studio", Package],["03","Сохрани товар","Фото, цены и остаток", "/products", Boxes]].map(([num,title,body,href,Icon]) => <Link key={String(num)} href={String(href)} className="flex items-center gap-3 rounded-xl border border-[var(--line)] p-3.5 transition active:bg-[var(--surface-muted)]"><span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[var(--surface-muted)] text-[11px] font-semibold text-[var(--muted)]">{num}</span><span className="min-w-0 flex-1"><span className="block text-sm font-medium">{title}</span><span className="mt-0.5 block truncate text-xs text-[var(--muted)]">{body}</span></span><Icon size={16} className="shrink-0 text-[var(--muted)]"/></Link>)}
+            {quickStart.map(({ num, title, body, href, Icon }) => <Link key={num} href={href} className="flex items-center gap-3 rounded-xl border border-[var(--line)] p-3.5 transition active:bg-[var(--surface-muted)]"><span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[var(--surface-muted)] text-[11px] font-semibold text-[var(--muted)]">{num}</span><span className="min-w-0 flex-1"><span className="block text-sm font-medium">{title}</span><span className="mt-0.5 block truncate text-xs text-[var(--muted)]">{body}</span></span><Icon size={16} className="shrink-0 text-[var(--muted)]"/></Link>)}
           </div>
         </div>
 
