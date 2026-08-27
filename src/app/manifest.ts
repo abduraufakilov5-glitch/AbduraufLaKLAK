@@ -4,8 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/dashboard",
     name: "Dilyas Shop",
-    short_name: "Dilyas Shop",
-    description: "AI-каталог, контент и остатки Dilyas Shop.",
+    short_name: "Dilyas",
+    description: "AI-каталог Dilyas Shop: товары, контент и остатки.",
     start_url: "/dashboard",
     scope: "/",
     display: "standalone",
@@ -13,8 +13,8 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#FAF9F6",
     lang: "ru",
     icons: [
-      { src: "/icon.png", sizes: "64x64", type: "image/png" },
-      { src: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+      { src: "/icon", sizes: "64x64", type: "image/png", purpose: "any maskable" },
+      { src: "/apple-icon", sizes: "180x180", type: "image/png", purpose: "any" },
     ],
   };
 }
